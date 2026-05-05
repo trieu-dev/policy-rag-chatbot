@@ -1,0 +1,72 @@
+name: CI
+
+on:
+  push:
+    branches: [ main, develop ]
+  pull_request:
+    branches: [ main ]
+
+jobs:
+  build-and-test:
+    runs-on: ubuntu-latest
+
+    services:
+      qdrant:
+        image: qdrant/qdrant:latest
+        ports:
+          - 6333:6333
+      redis:
+        image: redis:7-alpine
+        ports:
+          - 6379:6379
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup .NET 8
+        uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: '8.0.x'
+
+      - name: Setup Node 20 (frontend)
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+
+      - name: Restore .NET dependencies
+        run: |
+          for proj in src/week*/; do
+            if [ -f "$proj"*.csproj ]; then
+              dotnet restore "$proj"
+            fi
+          done
+
+      - name: Build all weekly projects
+        run: |
+          for proj in src/week*/; do
+            if [ -f "$proj"*.csproj ]; then
+              echo "Building $proj"
+              dotnet build "$proj" --no-restore --configuration Release
+            fi
+          done
+
+      - name: Run .NET tests
+        env:
+          QDRANT_URL: http://localhost:6333
+          REDIS_CONNECTION: localhost:6379
+        run: |
+          for proj in src/week*/*.Tests.csproj; do
+            if [ -f "$proj" ]; then
+              dotnet test "$proj" --no-build --configuration Release
+            fi
+          done
+
+      - name: Install frontend dependencies
+        working-directory: frontend
+        run: npm ci
+
+      - name: Build frontend
+        working-directory: frontend
+        run: npm run build
+        env:
+          NEXT_PUBLIC_API_URL: http://localhost:5000

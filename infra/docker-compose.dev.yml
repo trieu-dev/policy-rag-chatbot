@@ -1,0 +1,30 @@
+version: "3.9"
+
+# Use this for Weeks 1-9 when running the .NET app locally with `dotnet run`
+# Only starts infrastructure dependencies (Qdrant + Redis)
+
+services:
+
+  qdrant:
+    image: qdrant/qdrant:latest
+    container_name: policy-rag-qdrant
+    ports:
+      - "6333:6333"
+    volumes:
+      - ./data/qdrant:/qdrant/storage
+    restart: unless-stopped
+
+  redis:
+    image: redis:7-alpine
+    container_name: policy-rag-redis
+    ports:
+      - "6379:6379"
+    volumes:
+      - ./data/redis:/data
+    command: redis-server --appendonly yes
+    restart: unless-stopped
+
+# Usage:
+#   docker compose -f infra/docker-compose.dev.yml up -d
+#   cd src/weekXX-...
+#   dotnet run
