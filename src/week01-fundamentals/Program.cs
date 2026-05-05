@@ -5,14 +5,17 @@ using Week01;
 // Pure fundamentals: embed → similarity → grounded Claude answer
 // ---------------------------------------------------------------
 
-var anthropicKey = Environment.GetEnvironmentVariable("ANTHROPIC_API_KEY")
-    ?? throw new InvalidOperationException("Set ANTHROPIC_API_KEY env var");
-var openAiKey = Environment.GetEnvironmentVariable("OPENAI_API_KEY")
-    ?? throw new InvalidOperationException("Set OPENAI_API_KEY env var (for embeddings)");
+var anthropicKey = Environment.GetEnvironmentVariable("ANTHROPIC_API_KEY") ?? "dummy";
+var openAiKey    = Environment.GetEnvironmentVariable("OPENAI_API_KEY") ?? "dummy";
+
+var anthropicEndpoint = Environment.GetEnvironmentVariable("ANTHROPIC_ENDPOINT");
+var openaiEndpoint    = Environment.GetEnvironmentVariable("OPENAI_ENDPOINT");
+var anthropicModel    = Environment.GetEnvironmentVariable("ANTHROPIC_MODEL");
+var openaiModel       = Environment.GetEnvironmentVariable("OPENAI_MODEL");
 
 var http          = new HttpClient();
-var claudeClient  = new ClaudeClient(http, anthropicKey);
-var embedClient   = new EmbeddingClient(http, openAiKey);
+var claudeClient  = new ClaudeClient(http, anthropicKey, anthropicEndpoint, anthropicModel);
+var embedClient   = new EmbeddingClient(http, openAiKey, openaiEndpoint, openaiModel);
 
 // --- Hardcoded policy chunks (Week 3 will store these in Qdrant) ---
 var policyChunks = new[]

@@ -54,19 +54,19 @@ public static class VectorMath
 /// Thin wrapper to call an embedding API and return float[] vectors.
 /// Swap the endpoint to use OpenAI, Voyage, or any compatible provider.
 /// </summary>
-public class EmbeddingClient(HttpClient http, string apiKey)
+public class EmbeddingClient(HttpClient http, string apiKey, string? endpoint = null, string? model = null)
 {
     // TODO Week 1: swap to your chosen provider endpoint
     // OpenAI:  https://api.openai.com/v1/embeddings  (model: text-embedding-3-small)
     // Voyage:  https://api.voyageai.com/v1/embeddings (model: voyage-3)
-    private const string Endpoint = "https://api.openai.com/v1/embeddings";
-    private const string EmbeddingModel = "text-embedding-3-small";
+    private readonly string _endpoint = endpoint ?? "https://api.openai.com/v1/embeddings";
+    private readonly string _model = model ?? "text-embedding-3-small";
 
     public async Task<float[]> EmbedAsync(string text)
     {
-        using var req = new HttpRequestMessage(HttpMethod.Post, Endpoint);
+        using var req = new HttpRequestMessage(HttpMethod.Post, _endpoint);
         req.Headers.Add("Authorization", $"Bearer {apiKey}");
-        req.Content = JsonContent.Create(new { model = EmbeddingModel, input = text });
+        req.Content = JsonContent.Create(new { model = _model, input = text });
 
         var response = await http.SendAsync(req);
         response.EnsureSuccessStatusCode();

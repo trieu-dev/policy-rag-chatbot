@@ -24,6 +24,15 @@ services:
     command: redis-server --appendonly yes
     restart: unless-stopped
 
+  ollama:
+    image: ollama/ollama:latest
+    container_name: policy-rag-ollama
+    ports:
+      - "11434:11434"
+    volumes:
+      - ./data/ollama:/root/.ollama
+    restart: unless-stopped
+
 # Usage:
 #   docker compose -f infra/docker-compose.dev.yml up -d
 #   cd src/weekXX-...
