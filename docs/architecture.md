@@ -11,7 +11,7 @@ User
 Next.js Frontend (port 3000)
  │  SSE stream of tokens
  ▼
-ASP.NET Core 8 API (port 5000)
+ASP.NET Core 10 API (port 5000)
  │
  ├─► Redis ──────────────────── Semantic cache / embedding cache
  │
