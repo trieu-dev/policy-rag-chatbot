@@ -1,6 +1,6 @@
 # Policy RAG Chatbot
 
-A production-ready Retrieval-Augmented Generation (RAG) chatbot for company and insurance policy Q&A, built with **C# / ASP.NET Core 8**, **Semantic Kernel**, **Qdrant**, and **Claude API**.
+A production-ready Retrieval-Augmented Generation (RAG) chatbot for company and insurance policy Q&A, built with **C# / ASP.NET Core 10**, **Semantic Kernel**, **Qdrant**, and **Claude API**.
 
 Built week-by-week over 10 weeks. Each `src/weekXX-*` folder is a self-contained milestone you can run independently.
 
@@ -14,7 +14,7 @@ Built week-by-week over 10 weeks. Each `src/weekXX-*` folder is a self-contained
 | Orchestration | Semantic Kernel + Kernel Memory |
 | Vector DB | Qdrant |
 | Search | Hybrid (BM25 + dense vectors) + Reranking |
-| Backend | ASP.NET Core 8 Minimal API |
+| Backend | ASP.NET Core 10 Minimal API |
 | Cache | Redis (semantic + embedding + response) |
 | Auth | JWT Bearer + ASP.NET Core Identity |
 | Observability | OpenTelemetry + Langfuse |
@@ -66,11 +66,39 @@ docker compose -f infra/docker-compose.yml up
 
 ---
 
+## Free & Local Development (Ollama)
+
+You can run the entire pipeline for **free** using local models with [Ollama](https://ollama.com).
+
+1. **Start Ollama**: Use the dev infrastructure:
+   ```bash
+   docker compose -f infra/docker-compose.dev.yml up -d
+   ```
+
+2. **Pull Models**:
+   ```bash
+   docker exec -it policy-rag-ollama ollama pull llama3
+   docker exec -it policy-rag-ollama ollama pull nomic-embed-text
+   ```
+
+3. **Configure .env**:
+   Set the following in `infra/.env`:
+   ```env
+   ANTHROPIC_ENDPOINT=http://localhost:11434/v1/chat/completions
+   ANTHROPIC_MODEL=llama3
+   OPENAI_ENDPOINT=http://localhost:11434/v1/embeddings
+   OPENAI_MODEL=nomic-embed-text
+   ```
+
+---
+
+---
+
 ## Week-by-Week Progress
 
 | Week | Focus | Status |
 |---|---|---|
-| Week 1 | Fundamentals — embeddings, Claude API | ⬜ Not started |
+| Week 1 | Fundamentals — embeddings, Claude API | 🔄 In progress |
 | Week 2 | Document ingestion — PDF, chunking | ⬜ Not started |
 | Week 3 | Vector DB — Qdrant setup | ⬜ Not started |
 | Week 4 | Semantic Kernel orchestration | ⬜ Not started |
