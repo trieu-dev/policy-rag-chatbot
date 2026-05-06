@@ -1,0 +1,20 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <OutputType>Exe</OutputType>
+    <TargetFramework>net10.0</TargetFramework>
+    <Nullable>enable</Nullable>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <RootNamespace>Week03</RootNamespace>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <!-- PDF extraction (same as week02) -->
+    <PackageReference Include="PdfPig" Version="0.1.9" />
+    <!-- Qdrant vector database client -->
+    <PackageReference Include="Qdrant.Client" Version="1.13.0" />
+    <!-- OpenAI-compatible client for embeddings (works with Ollama) -->
+    <PackageReference Include="OpenAI" Version="2.1.0" />
+    <!-- dotenv for reading infra/.env -->
+    <PackageReference Include="DotNetEnv" Version="3.1.1" />
+  </ItemGroup>
+</Project>

@@ -100,7 +100,7 @@ You can run the entire pipeline for **free** using local models with [Ollama](ht
 |---|---|---|
 | Week 1 | Fundamentals — embeddings, Claude API | 🔄 In progress |
 | Week 2 | Document ingestion — PDF, chunking | ⬜ Not started |
-| Week 3 | Vector DB — Qdrant setup | ⬜ Not started |
+| Week 3 | Vector DB — Qdrant setup | ✅ Done |
 | Week 4 | Semantic Kernel orchestration | ⬜ Not started |
 | Week 5 | ASP.NET Core API + SSE streaming | ⬜ Not started |
 | Week 6 | Hybrid search + reranking | ⬜ Not started |
