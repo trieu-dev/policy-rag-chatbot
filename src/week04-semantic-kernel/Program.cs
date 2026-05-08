@@ -69,9 +69,7 @@ class Program
         // Integration test mode check
         if (args.Length > 0 && args[0] == "--test")
         {
-            Console.WriteLine("Running integration test...");
-            var result = await ragPlugin.SearchMemoryAsync("attention is all you need");
-            Console.WriteLine(result);
+            await RagIntegrationTests.RunAsync(memory);
             return;
         }
 
