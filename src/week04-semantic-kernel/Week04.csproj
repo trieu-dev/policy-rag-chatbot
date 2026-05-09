@@ -6,13 +6,15 @@
     <Nullable>enable</Nullable>
     <ImplicitUsings>enable</ImplicitUsings>
     <RootNamespace>Week04</RootNamespace>
+    <NoWarn>$(NoWarn);SKEXP0010;SKEXP0001;SKEXP0011;SKEXP0052;SKEXP0070</NoWarn>
   </PropertyGroup>
 
   <ItemGroup>
     <PackageReference Include="DotNetEnv" Version="3.1.1" />
-    <PackageReference Include="Microsoft.SemanticKernel" Version="1.13.0" />
-    <PackageReference Include="Microsoft.KernelMemory.Core" Version="0.62.240605.1" />
-    <PackageReference Include="Microsoft.KernelMemory.MemoryDb.Qdrant" Version="0.62.240605.1" />
+    <PackageReference Include="Microsoft.SemanticKernel" Version="1.75.0" />
+    <PackageReference Include="Microsoft.KernelMemory.Core" Version="0.98.250508.3" />
+    <PackageReference Include="Microsoft.KernelMemory.AI.Ollama" Version="0.98.250508.3" />
+    <PackageReference Include="Microsoft.KernelMemory.MemoryDb.Qdrant" Version="0.98.250508.3" />
   </ItemGroup>
 
 </Project>
