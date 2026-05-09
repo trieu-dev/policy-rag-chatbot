@@ -40,6 +40,7 @@ builder.Services.AddSingleton<IKernelMemory>(memory);
 
 // 2. Setup Custom Services
 builder.Services.AddSingleton<IIngestionQueue, IngestionQueue>();
+builder.Services.AddHostedService<IngestionWorker>();
 
 // 3. API Infrastructure
 builder.Services.AddEndpointsApiExplorer();
