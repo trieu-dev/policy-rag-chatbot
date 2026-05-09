@@ -152,7 +152,11 @@ app.MapGet("/chat/history/{chatId}", (string chatId, IHistoryStore historyStore)
     return Results.Ok(history.Select(m => new { role = m.Role.ToString(), content = m.Content }));
 })
 .WithName("GetChatHistory")
-.WithOpenApi(op => { op.Summary = "Retrieve conversation history for a specific chat ID"; return op; });
+.WithOpenApi(op => { 
+    op.Summary = "Retrieve conversation history"; 
+    op.Description = "Returns the full list of messages for a specific chat session.";
+    return op; 
+});
 
 // DELETE /chat/{chatId}
 app.MapDelete("/chat/{chatId}", (string chatId, IHistoryStore historyStore) =>
@@ -161,7 +165,11 @@ app.MapDelete("/chat/{chatId}", (string chatId, IHistoryStore historyStore) =>
     return Results.NoContent();
 })
 .WithName("DeleteChatHistory")
-.WithOpenApi(op => { op.Summary = "Delete conversation history for a specific chat ID"; return op; });
+.WithOpenApi(op => { 
+    op.Summary = "Delete chat history"; 
+    op.Description = "Removes all stored messages for a specific chat session.";
+    return op; 
+});
 
 app.Run();
 
