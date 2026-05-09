@@ -2,6 +2,7 @@ using System;
 using System.Net.Http;
 using System.Threading.Tasks;
 using Microsoft.KernelMemory;
+using Microsoft.KernelMemory.AI.Ollama;
 using Microsoft.SemanticKernel;
 using Microsoft.SemanticKernel.ChatCompletion;
 using Week04.Plugins;
@@ -17,34 +18,25 @@ class Program
         Config.Load();
 
         string chatModel = Config.GetEnv("ANTHROPIC_MODEL", "llama3");
-        string chatEndpointStr = Config.GetEnv("ANTHROPIC_ENDPOINT", "http://localhost:11434/v1/chat/completions");
-        
-        // Ensure endpoint is just the base URI for SK
-        Uri chatUri = new Uri(chatEndpointStr);
-        Uri chatBaseUri = new Uri($"{chatUri.Scheme}://{chatUri.Host}:{chatUri.Port}/v1/");
+        string ollamaEndpoint = Config.GetEnv("OLLAMA_ENDPOINT", "http://localhost:11434");
 
         string embedModel = Config.GetEnv("OPENAI_MODEL", "nomic-embed-text");
-        string embedEndpointStr = Config.GetEnv("OPENAI_ENDPOINT", "http://localhost:11434/v1/embeddings");
-        Uri embedUri = new Uri(embedEndpointStr);
-        Uri embedBaseUri = new Uri($"{embedUri.Scheme}://{embedUri.Host}:{embedUri.Port}/v1/");
-
         string qdrantUrl = Config.GetEnv("QDRANT_URL", "http://localhost:6333");
 
         // 1. Setup Kernel Memory with Qdrant and local embeddings
         var memoryBuilder = new KernelMemoryBuilder()
-            .WithOpenAITextGeneration(new OpenAIConfig
+            .WithOllamaTextGeneration(new OllamaConfig
             {
-                APIKey = "dummy",
-                TextModel = chatModel,
-                Endpoint = chatBaseUri.ToString()
+                Endpoint = ollamaEndpoint,
+                TextModel = new OllamaModelConfig(chatModel)
             })
-            .WithOpenAITextEmbeddingGeneration(new OpenAIConfig
+            .WithOllamaTextEmbeddingGeneration(new OllamaConfig
             {
-                APIKey = "dummy",
-                EmbeddingModel = embedModel,
-                Endpoint = embedBaseUri.ToString()
+                Endpoint = ollamaEndpoint,
+                EmbeddingModel = new OllamaModelConfig(embedModel)
             })
-            .WithQdrantMemoryDb(qdrantUrl);
+            .WithQdrantMemoryDb(qdrantUrl)
+            .WithSimpleFileStorage("data");
 
         var memory = memoryBuilder.Build<MemoryServerless>();
 
@@ -53,7 +45,7 @@ class Program
         builder.AddOpenAIChatCompletion(
             modelId: chatModel,
             apiKey: "dummy",
-            endpoint: chatBaseUri
+            endpoint: new Uri($"{ollamaEndpoint}/v1")
         );
 
         var kernel = builder.Build();
@@ -80,6 +72,7 @@ class Program
             Console.Write("\n> ");
             var userInput = Console.ReadLine();
 
+            if (userInput == null) break;
             if (string.IsNullOrWhiteSpace(userInput)) continue;
             if (userInput.ToLower() == "exit" || userInput.ToLower() == "quit") break;
 
