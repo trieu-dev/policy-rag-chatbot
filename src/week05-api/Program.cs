@@ -42,7 +42,17 @@ builder.Services.AddSingleton<IKernelMemory>(memory);
 builder.Services.AddSingleton<IIngestionQueue, IngestionQueue>();
 builder.Services.AddHostedService<IngestionWorker>();
 
-// 3. API Infrastructure
+// 3. Setup Semantic Kernel with Ollama
+var skBuilder = Kernel.CreateBuilder();
+skBuilder.AddOllamaChatCompletion(
+    modelId: chatModel,
+    endpoint: new Uri(ollamaEndpoint)
+);
+
+var kernel = skBuilder.Build();
+builder.Services.AddSingleton<Kernel>(kernel);
+
+// 4. API Infrastructure
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddOpenApi();
 
@@ -83,7 +93,38 @@ app.MapPost("/ingest", async (IFormFile file, IIngestionQueue queue) =>
 .DisableAntiforgery() // Simplification for dev
 .WithOpenApi(op => { op.Summary = "Upload a PDF for background ingestion"; return op; });
 
+// POST /chat (SSE Streaming)
+app.MapPost("/chat", async (HttpContext context, [FromBody] ChatRequest request, Kernel kernel, IKernelMemory memory) =>
+{
+    context.Response.ContentType = "text/event-stream";
+    
+    var searchResult = await memory.AskAsync(request.Query);
+    string ragContext = searchResult.Result;
+    
+    var chatService = kernel.GetRequiredService<IChatCompletionService>();
+    string systemPrompt = $@"Use the following context to answer the user's question: {ragContext}";
+    var turnHistory = new ChatHistory(systemPrompt);
+    turnHistory.AddUserMessage(request.Query);
+
+    var responseStream = chatService.GetStreamingChatMessageContentsAsync(turnHistory, kernel: kernel);
+    await foreach (var chunk in responseStream)
+    {
+        if (chunk.Content != null)
+        {
+            await context.Response.WriteAsync($"data: {JsonSerializer.Serialize(new { content = chunk.Content })}\n\n");
+            await context.Response.Body.FlushAsync();
+        }
+    }
+    await context.Response.WriteAsync("data: [DONE]\n\n");
+    await context.Response.Body.FlushAsync();
+})
+.WithName("ChatStream")
+.WithOpenApi(op => { op.Summary = "Ask a question and get a streamed RAG response (SSE)"; return op; });
+
 app.Run();
+
+// Request Model
+public record ChatRequest(string Query, string ChatId = "default");
 
 // Make the implicit Program class public so test projects can access it
 public partial class Program { }
