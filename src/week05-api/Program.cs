@@ -40,6 +40,7 @@ builder.Services.AddSingleton<IKernelMemory>(memory);
 
 // 2. Setup Custom Services
 builder.Services.AddSingleton<IIngestionQueue, IngestionQueue>();
+builder.Services.AddSingleton<IHistoryStore, HistoryStore>();
 builder.Services.AddHostedService<IngestionWorker>();
 
 // 3. Setup Semantic Kernel with Ollama
@@ -94,32 +95,73 @@ app.MapPost("/ingest", async (IFormFile file, IIngestionQueue queue) =>
 .WithOpenApi(op => { op.Summary = "Upload a PDF for background ingestion"; return op; });
 
 // POST /chat (SSE Streaming)
-app.MapPost("/chat", async (HttpContext context, [FromBody] ChatRequest request, Kernel kernel, IKernelMemory memory) =>
+app.MapPost("/chat", async (HttpContext context, [FromBody] ChatRequest request, Kernel kernel, IKernelMemory memory, IHistoryStore historyStore) =>
 {
     context.Response.ContentType = "text/event-stream";
     
     var searchResult = await memory.AskAsync(request.Query);
     string ragContext = searchResult.Result;
-    
+    string citations = string.Join("\n", searchResult.RelevantSources.Select(s => $"Source: {s.SourceName} ({s.Link})"));
+
+    var history = historyStore.GetHistory(request.ChatId);
+    history.AddUserMessage(request.Query);
+
     var chatService = kernel.GetRequiredService<IChatCompletionService>();
-    string systemPrompt = $@"Use the following context to answer the user's question: {ragContext}";
+    string systemPrompt = $@"Use the following context to answer the user's question. 
+Context:
+{ragContext}
+
+If the answer is not in the context, say so. Always cite sources if possible.";
+
     var turnHistory = new ChatHistory(systemPrompt);
-    turnHistory.AddUserMessage(request.Query);
+    foreach (var msg in history) turnHistory.Add(msg);
 
     var responseStream = chatService.GetStreamingChatMessageContentsAsync(turnHistory, kernel: kernel);
+    string fullResponse = "";
+
     await foreach (var chunk in responseStream)
     {
         if (chunk.Content != null)
         {
+            fullResponse += chunk.Content;
             await context.Response.WriteAsync($"data: {JsonSerializer.Serialize(new { content = chunk.Content })}\n\n");
             await context.Response.Body.FlushAsync();
         }
     }
+
+    if (!string.IsNullOrEmpty(citations))
+    {
+        await context.Response.WriteAsync($"data: {JsonSerializer.Serialize(new { content = "\n\n" + citations })}\n\n");
+        await context.Response.Body.FlushAsync();
+        fullResponse += "\n\n" + citations;
+    }
+
+    history.AddAssistantMessage(fullResponse);
+    historyStore.SaveHistory(request.ChatId, history);
+
     await context.Response.WriteAsync("data: [DONE]\n\n");
     await context.Response.Body.FlushAsync();
 })
 .WithName("ChatStream")
 .WithOpenApi(op => { op.Summary = "Ask a question and get a streamed RAG response (SSE)"; return op; });
+
+// GET /chat/history
+app.MapGet("/chat/history/{chatId}", (string chatId, IHistoryStore historyStore) =>
+{
+    var history = historyStore.GetHistory(chatId);
+    return Results.Ok(history.Select(m => new { role = m.Role.ToString(), content = m.Content }));
+})
+.WithName("GetChatHistory")
+.WithOpenApi(op => { op.Summary = "Retrieve conversation history for a specific chat ID"; return op; });
+
+// DELETE /chat/{chatId}
+app.MapDelete("/chat/{chatId}", (string chatId, IHistoryStore historyStore) =>
+{
+    historyStore.DeleteHistory(chatId);
+    return Results.NoContent();
+})
+.WithName("DeleteChatHistory")
+.WithOpenApi(op => { op.Summary = "Delete conversation history for a specific chat ID"; return op; });
 
 app.Run();
 
