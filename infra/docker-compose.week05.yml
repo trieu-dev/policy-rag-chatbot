@@ -1,0 +1,22 @@
+version: "3.9"
+
+services:
+  week05-api:
+    build:
+      context: ../src/week05-api
+      dockerfile: Dockerfile
+    container_name: policy-rag-api-week05
+    ports:
+      - "5005:8080"
+    environment:
+      - OLLAMA_ENDPOINT=http://ollama:11434
+      - QDRANT_URL=http://qdrant:6333
+      - ANTHROPIC_MODEL=llama3
+      - OPENAI_MODEL=nomic-embed-text
+    volumes:
+      - ../src/week05-api/data:/app/data
+    restart: unless-stopped
+
+networks:
+  default:
+    name: policy-rag-network

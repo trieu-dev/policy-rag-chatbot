@@ -1,0 +1,7 @@
+bin/
+obj/
+out/
+data/
+.vscode/
+*.user
+*.lock.json
