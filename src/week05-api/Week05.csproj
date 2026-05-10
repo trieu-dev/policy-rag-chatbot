@@ -12,11 +12,11 @@
   <ItemGroup>
     <PackageReference Include="DotNetEnv" Version="3.1.1" />
     <PackageReference Include="Microsoft.AspNetCore.OpenApi" Version="9.0.0" />
-    <PackageReference Include="Microsoft.SemanticKernel" Version="1.75.0" />
+    <PackageReference Include="Microsoft.SemanticKernel" Version="1.31.0" />
     <PackageReference Include="Microsoft.SemanticKernel.Connectors.Ollama" Version="1.31.0-alpha" />
-    <PackageReference Include="Microsoft.KernelMemory.Core" Version="0.98.250508.3" />
-    <PackageReference Include="Microsoft.KernelMemory.AI.Ollama" Version="0.98.250508.3" />
-    <PackageReference Include="Microsoft.KernelMemory.MemoryDb.Qdrant" Version="0.98.250508.3" />
+    <PackageReference Include="Microsoft.KernelMemory.Core" Version="0.96.241218.1" />
+    <PackageReference Include="Microsoft.KernelMemory.AI.Ollama" Version="0.96.241218.1" />
+    <PackageReference Include="Microsoft.KernelMemory.MemoryDb.Qdrant" Version="0.96.241218.1" />
   </ItemGroup>
 
 </Project>
