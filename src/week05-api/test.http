@@ -1,0 +1,31 @@
+@baseUrl = http://localhost:5000
+
+### 1. Health Check
+GET {{baseUrl}}/health
+
+### 2. Ingest Document
+# This requires a PDF file. Use attention-is-all-you-need.pdf from the root.
+POST {{baseUrl}}/ingest
+Content-Type: multipart/form-data; boundary=----WebKitFormBoundary7MA4YWxkTrZu0gW
+
+------WebKitFormBoundary7MA4YWxkTrZu0gW
+Content-Disposition: form-data; name="file"; filename="attention-is-all-you-need.pdf"
+Content-Type: application/pdf
+
+# < ../../attention-is-all-you-need.pdf
+# ------WebKitFormBoundary7MA4YWxkTrZu0gW--
+
+### 3. Chat (Streaming)
+POST {{baseUrl}}/chat
+Content-Type: application/json
+
+{
+    "Query": "What is a Transformer?",
+    "ChatId": "test-session-123"
+}
+
+### 4. Get Chat History
+GET {{baseUrl}}/chat/history/test-session-123
+
+### 5. Delete Chat History
+DELETE {{baseUrl}}/chat/test-session-123

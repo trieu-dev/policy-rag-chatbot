@@ -26,6 +26,7 @@ frontend/out/
 
 # Docker
 infra/data/
+src/week05-api/data/
 
 # OS
 .DS_Store
