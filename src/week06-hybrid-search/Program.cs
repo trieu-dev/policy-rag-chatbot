@@ -33,7 +33,7 @@ var memory = new KernelMemoryBuilder()
         EmbeddingModel = new OllamaModelConfig(embeddingModel)
     })
     .WithQdrantMemoryDb(qdrantConfig["Endpoint"]!)
-    .Build<MemoryServerless>();
+    .Build<MemoryServerless>(new KernelMemoryBuilderBuildOptions { AllowMixingVolatileAndPersistentData = true });
 
 Console.WriteLine($"Initialized with Ollama ({textModel}) and Qdrant.");
 
