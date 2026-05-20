@@ -14,7 +14,8 @@ public class HybridSearchEngine
     {
         _memory = memory;
         var uri = new Uri(qdrantEndpoint);
-        _qdrantClient = new QdrantClient(uri.Host, uri.Port, https: uri.Scheme == "https");
+        var grpcPort = uri.Port == 6333 ? 6334 : uri.Port;
+        _qdrantClient = new QdrantClient(uri.Host, grpcPort, https: uri.Scheme == "https");
         _collectionName = collectionName;
     }
 

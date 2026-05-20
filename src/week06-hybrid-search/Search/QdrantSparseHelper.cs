@@ -8,7 +8,8 @@ public static class QdrantSparseHelper
     public static async Task EnsureSparseVectorEnabledAsync(string endpoint, string collectionName)
     {
         var uri = new Uri(endpoint);
-        var client = new QdrantClient(uri.Host, uri.Port, https: uri.Scheme == "https");
+        var grpcPort = uri.Port == 6333 ? 6334 : uri.Port;
+        var client = new QdrantClient(uri.Host, grpcPort, https: uri.Scheme == "https");
 
         var collections = await client.ListCollectionsAsync();
         bool exists = collections.Contains(collectionName);
